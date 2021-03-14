@@ -1,5 +1,4 @@
 use iwlib_sys::*;
-use libc;
 use std::ffi::CStr;
 use std::ffi::CString;
 
