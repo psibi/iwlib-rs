@@ -3,50 +3,71 @@ use libc;
 use std::ffi::CStr;
 use std::ffi::CString;
 
+/// Represents wireless information for a particular ESSID
 #[derive(PartialEq, PartialOrd, Debug)]
 pub struct WirelessInfo {
-    wi_essid: String,
-    wi_quality: u8,
+    /// ESSID  identifying the name of the wireless network
+    pub wi_essid: String,
+    /// Quality of the wireless network
+    pub wi_quality: u8,
 }
 
+/// Get current active `WirelessInfo` for the `interface`.
+///
+/// # Arguments
+///
+/// * `interface` - String representing the name name of the network
+/// interface for your wireless hardware. In Linux systems, you can
+/// find that out using `iw dev` command.
+///
+/// # Examples
+///
+/// ```
+/// use iwlib::*;
+/// let wireless_info = get_wireless_info("wlan0".to_string());
+/// ```
 pub fn get_wireless_info(interface: String) -> Option<WirelessInfo> {
     let interface_name = CString::new(interface).unwrap();
-
-    unsafe {
-        let mut config: wireless_config = Default::default();
-        let mut statistics: iw_statistics = Default::default();
-        let mut range: iw_range = Default::default();
-        let handle = iw_sockets_open();
-
-        let bcr = iw_get_basic_config(handle, interface_name.as_ptr(), &mut config);
-        let str = iw_get_stats(
+    let mut config: wireless_config = Default::default();
+    let mut statistics: iw_statistics = Default::default();
+    let mut range: iw_range = Default::default();
+    let handle = unsafe { iw_sockets_open() };
+    let basic_config_status =
+        unsafe { iw_get_basic_config(handle, interface_name.as_ptr(), &mut config) };
+    if basic_config_status < 0 {
+        unsafe {
+            libc::close(handle);
+        }
+        return None;
+    }
+    let stats_status = unsafe {
+        iw_get_stats(
             handle,
             interface_name.as_ptr(),
             &mut statistics,
             &mut range,
             1,
-        );
-        let rgr = iw_get_range_info(handle, interface_name.as_ptr(), &mut range);
+        )
+    };
+    let range_status = unsafe { iw_get_range_info(handle, interface_name.as_ptr(), &mut range) };
+    unsafe {
         libc::close(handle);
-        if bcr < 0 {
-            return None;
+    }
+    let mut quality: f64 = 0.0;
+    if stats_status >= 0 && range_status >= 0 {
+        let stats_quality = get_quality(statistics.qual);
+        let range_quality = get_quality(range.max_qual);
+        if range_quality != 0 {
+            quality = stats_quality as f64 / range_quality as f64;
         }
-        let mut quality: f64 = 0.0;
-        if str >= 0 && rgr >= 0 {
-            let stats_quality = compute_quality(statistics.qual);
-            let range_quality = compute_quality(range.max_qual);
-            if range_quality != 0 {
-                quality = stats_quality as f64 / range_quality as f64;
-            }
-        }
-        match compute_essid(config) {
-            None => return None,
-            Some(essid) => {
-                return Some(WirelessInfo {
-                    wi_essid: essid,
-                    wi_quality: (quality * 100.0) as u8,
-                })
-            }
+    }
+    match compute_essid(config) {
+        None => return None,
+        Some(essid) => {
+            return Some(WirelessInfo {
+                wi_essid: essid,
+                wi_quality: (quality * 100.0) as u8,
+            })
         }
     }
 }
@@ -59,7 +80,7 @@ fn compute_essid(wconfig: wireless_config) -> Option<String> {
     None
 }
 
-fn compute_quality(config: iw_quality) -> u8 {
+fn get_quality(config: iw_quality) -> u8 {
     config.qual
 }
 

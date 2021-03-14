@@ -6,7 +6,8 @@ edition = "2018"
 readme = "README.md"
 description = "Safe bindings to libiw library"
 repository = "https://github.com/psibi/iwlib-rs"
-
+keywords = ["Wireless", "Linux"]
+license = "MIT"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]

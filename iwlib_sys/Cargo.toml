@@ -5,6 +5,8 @@ authors = ["Sibi Prabakaran <sibi@psibi.in>"]
 edition = "2018"
 readme = "README.md"
 repository = "https://github.com/psibi/iwlib-rs"
+keywords = ["Wireless", "Linux"]
+license = "MIT"
 description = "Bindings to iwlib for which can be used to manipulate wireless extension for Linux"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
