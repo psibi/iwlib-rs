@@ -1,5 +1,7 @@
 # iwlib
 
+[![CI](https://github.com/psibi/iwlib-rs/actions/workflows/ci.yml/badge.svg)](https://github.com/psibi/iwlib-rs/actions/workflows/ci.yml)
+
 Provides safe bindings on top of libiw library.
 
 ## Usage
