@@ -1,18 +1,12 @@
-#![allow(non_upper_case_globals)]
-#![allow(non_camel_case_types)]
-#![allow(non_snake_case)]
-#![allow(improper_ctypes)]
-#![allow(clippy::all)]
-
+use iwlib_sys::*;
+use libc;
 use std::ffi::CStr;
 use std::ffi::CString;
 
-include!(concat!(env!("OUT_DIR"), "/bindings.rs"));
-
 #[derive(PartialEq, PartialOrd, Debug)]
 pub struct WirelessInfo {
-    wiEssid: String,
-    wiQuality: u8,
+    wi_essid: String,
+    wi_quality: u8,
 }
 
 pub fn get_wireless_info(interface: String) -> Option<WirelessInfo> {
@@ -33,6 +27,7 @@ pub fn get_wireless_info(interface: String) -> Option<WirelessInfo> {
             1,
         );
         let rgr = iw_get_range_info(handle, interface_name.as_ptr(), &mut range);
+        libc::close(handle);
         if bcr < 0 {
             return None;
         }
@@ -48,8 +43,8 @@ pub fn get_wireless_info(interface: String) -> Option<WirelessInfo> {
             None => return None,
             Some(essid) => {
                 return Some(WirelessInfo {
-                    wiEssid: essid,
-                    wiQuality: (quality * 100.0) as u8,
+                    wi_essid: essid,
+                    wi_quality: (quality * 100.0) as u8,
                 })
             }
         }
@@ -67,8 +62,6 @@ fn compute_essid(wconfig: wireless_config) -> Option<String> {
 fn compute_quality(config: iw_quality) -> u8 {
     config.qual
 }
-
-// todo: drop memory
 
 #[cfg(test)]
 mod tests {
