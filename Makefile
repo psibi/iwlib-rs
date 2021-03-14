@@ -8,6 +8,7 @@ all-tests:
 
 ## Pre-check before publishing to crate
 check:
+	cargo clean
 	make all-tests
 	cargo fmt --all -- --check
 	cargo clippy -- -D warnings

@@ -39,15 +39,8 @@ pub fn get_wireless_info(interface: String) -> Option<WirelessInfo> {
         }
         return None;
     }
-    let stats_status = unsafe {
-        iw_get_stats(
-            handle,
-            interface_name.as_ptr(),
-            &mut statistics,
-            &mut range,
-            1,
-        )
-    };
+    let stats_status =
+        unsafe { iw_get_stats(handle, interface_name.as_ptr(), &mut statistics, &range, 1) };
     let range_status = unsafe { iw_get_range_info(handle, interface_name.as_ptr(), &mut range) };
     unsafe {
         libc::close(handle);
@@ -61,13 +54,11 @@ pub fn get_wireless_info(interface: String) -> Option<WirelessInfo> {
         }
     }
     match compute_essid(config) {
-        None => return None,
-        Some(essid) => {
-            return Some(WirelessInfo {
-                wi_essid: essid,
-                wi_quality: (quality * 100.0) as u8,
-            })
-        }
+        None => None,
+        Some(essid) => Some(WirelessInfo {
+            wi_essid: essid,
+            wi_quality: (quality * 100.0) as u8,
+        }),
     }
 }
 
