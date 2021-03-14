@@ -21,6 +21,8 @@ jobs:
       - name: Test
         run: |
           set -e
+          apt install llvm-dev libclang-dev clang
+          apt install libiw-dev
           cargo build
           make check
         shell: bash
