@@ -25,8 +25,8 @@ pub struct WirelessInfo {
 /// use iwlib::*;
 /// let wireless_info = get_wireless_info("wlan0".to_string());
 /// ```
-pub fn get_wireless_info(interface: String) -> Option<WirelessInfo> {
-    let interface_name = CString::new(interface).unwrap();
+pub fn get_wireless_info(interface: impl AsRef<str>) -> Option<WirelessInfo> {
+    let interface_name = CString::new(interface.as_ref()).unwrap();
     let mut config: wireless_config = Default::default();
     let mut statistics: iw_statistics = Default::default();
     let mut range: iw_range = Default::default();
@@ -77,8 +77,15 @@ mod tests {
     use super::*;
 
     #[test]
-    fn it_does_not_crash() {
-        let wireless_info = get_wireless_info("wlp0s20f3".to_string());
-        println!("Wireless info: {:?}", wireless_info);
+    fn it_does_not_crash_string() {
+        println!(
+            "Wireless info: {:?}",
+            get_wireless_info("wlp0s20f3".to_string())
+        );
+    }
+
+    #[test]
+    fn it_does_not_crash_str() {
+        println!("Wireless info: {:?}", get_wireless_info("wlp0s20f3"));
     }
 }
