@@ -53,13 +53,11 @@ pub fn get_wireless_info(interface: String) -> Option<WirelessInfo> {
             quality = stats_quality as f64 / range_quality as f64;
         }
     }
-    match compute_essid(config) {
-        None => None,
-        Some(essid) => Some(WirelessInfo {
-            wi_essid: essid,
-            wi_quality: (quality * 100.0) as u8,
-        }),
-    }
+
+    compute_essid(config).map(|essid| WirelessInfo {
+        wi_essid: essid,
+        wi_quality: (quality * 100.0) as u8,
+    })
 }
 
 fn compute_essid(wconfig: wireless_config) -> Option<String> {

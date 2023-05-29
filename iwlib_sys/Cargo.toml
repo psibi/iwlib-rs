@@ -18,4 +18,4 @@ name = "iwlib_sys"
 path = "lib.rs"
 
 [build-dependencies]
-bindgen = "0.53.1"
+bindgen = "0.65.1"
